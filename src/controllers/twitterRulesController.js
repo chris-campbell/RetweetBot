@@ -7,8 +7,6 @@ const getRules = async (req, res) => {
   try {
     const { data } = await axios.get(rulesURL, config);
 
-    if (!data.data) return res.status(404).send("No rules set.");
-
     return res.send(JSON.stringify(data));
   } catch (error) {
     throw new Error(error);
@@ -17,7 +15,6 @@ const getRules = async (req, res) => {
 
 const setRules = async (req, res) => {
   const { rules } = req.body;
-
   const addableRule = { value: rules };
 
   const rulesData = {
@@ -27,16 +24,9 @@ const setRules = async (req, res) => {
   try {
     const { data } = await axios.post(rulesURL, rulesData, config);
 
-    if (data.errors)
-      return res
-        .status(409)
-        .send(
-          `Rule(s) being applied already exist in list "${data.errors[0].value}"`
-        );
-
     return res.send(JSON.stringify(data));
   } catch (error) {
-    console.log(error);
+    console.log(error.response.data.errors);
   }
 };
 
@@ -46,7 +36,7 @@ const deleteRules = async (req, res) => {
   const rules = response.data.data;
 
   if (!Array.isArray(rules)) {
-    return res.status(404).send("No rules found");
+    return res.send(null);
   }
 
   const ids = rules.map((rule) => rule.id);
